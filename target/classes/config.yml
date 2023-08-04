@@ -1,0 +1,23 @@
+# 启用插件
+enable: true
+# 插件前缀
+prefix: "&b[区块漏斗]"
+# 区块漏斗名字
+name: '区块漏斗'
+# 一个区块最大漏斗上限
+limit: 32
+# 在一个方块被破坏多久之后检测
+delay: 20
+# 漏斗收集物品列表
+itemList:
+- POTATO
+- CARROT
+- WHEAT
+- WHEAT_SEEDS
+- BEETROOT
+- BEETROOT_SEEDS
+- NETHER_WART
+- MELON_SLICE
+- PUMPKIN
+- BAMBOO
+- SUGAR_CANE
