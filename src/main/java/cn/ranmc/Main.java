@@ -20,13 +20,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -78,7 +81,7 @@ public class Main extends JavaPlugin implements Listener {
     private void hopper(Location location) {
         Chunk chunk = location.getChunk();
         String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-        if(lock.contains(name)) {
+        if (lock.contains(name)) {
             return;
         } else {
             lock.add(name);
@@ -104,7 +107,7 @@ public class Main extends JavaPlugin implements Listener {
         List<String> itemList = getConfig().getStringList("itemList");
         if (!enable || !chunk.isLoaded() || data.getString(name)==null) return;
         Entity[] entities = chunk.getEntities();
-        String[] xyz = data.getString(name).split("x");
+        String[] xyz = Objects.requireNonNull(data.getString(name)).split("x");
         Block block = location.getWorld().getBlockAt(Integer.parseInt(xyz[0]), Integer.parseInt(xyz[1]), Integer.parseInt(xyz[2]));
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
@@ -125,7 +128,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     private void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
-        if(!enable) return;
+        if (!enable) return;
         hopper(event.getBlock().getLocation());
     }
 
@@ -134,8 +137,7 @@ public class Main extends JavaPlugin implements Listener {
         if (!enable) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if (player != null && !event.isCancelled() &&
-                block.getType() == Material.HOPPER) {
+        if (!event.isCancelled() && block.getType() == Material.HOPPER) {
             String chunkName = block.getChunk().toString();
             if (hopperCount.containsKey(chunkName)) {
                 int count = hopperCount.get(chunkName);
@@ -165,8 +167,8 @@ public class Main extends JavaPlugin implements Listener {
             }
             Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
-            if(HopperName.equals(hopper.getCustomName())) {
-                if(data.getString(name)!=null) {
+            if (HopperName.equals(hopper.getCustomName())) {
+                if (data.getString(name)!=null) {
                     String[] xyz = data.getString(name).split("x");
                     player.sendMessage(prefix + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
                     event.setCancelled(true);
@@ -195,16 +197,16 @@ public class Main extends JavaPlugin implements Listener {
         Block block = event.getBlock();
         hopper(block.getLocation());
         Player player = event.getPlayer();
-        if (player!=null && block.getType() == Material.HOPPER) {
+        if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
             String chunkName = block.getChunk().toString();
             if (hopperCount.containsKey(chunkName)) hopperCount.put(chunkName, hopperCount.get(chunkName) - 1);
-            if(HopperName.equals(hopper.getCustomName())) {
+            if (HopperName.equals(hopper.getCustomName())) {
                 player.sendMessage(prefix + color("&e你破坏了一个区块漏斗"));
                 data.set(hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ(),null);
                 try {
                     data.save(yml);
-                } catch (IOException e) {}
+                } catch (IOException ignore) {}
             }
 
         }
@@ -212,17 +214,12 @@ public class Main extends JavaPlugin implements Listener {
 
     /**
      * 指令输入
-     * @param sender
-     * @param cmd
-     * @param label
-     * @param args
-     * @return
      */
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("ch") && args.length==1) {
-            if (args[0].equalsIgnoreCase("reload")){
-                if(sender.hasPermission("ch.admin")) {
+            if (args[0].equalsIgnoreCase("reload")) {
+                if (sender.hasPermission("ch.admin")) {
                     loadConfig();
                     sender.sendMessage(prefix + color("&a重载成功"));
                     return true;
@@ -248,7 +245,7 @@ public class Main extends JavaPlugin implements Listener {
     /**
      * 加载配置文件
      */
-    private void loadConfig(){
+    private void loadConfig() {
         //加载config
         if (!new File(getDataFolder() + File.separator + "config.yml").exists()) {
             saveDefaultConfig();
@@ -259,7 +256,7 @@ public class Main extends JavaPlugin implements Listener {
 
         //加载数据
         yml = new File(this.getDataFolder(), "data.yml");
-        if(!yml.exists()) {
+        if (!yml.exists()) {
             this.saveResource("data.yml", true);
         }
         data = YamlConfiguration.loadConfiguration(yml);
@@ -268,7 +265,7 @@ public class Main extends JavaPlugin implements Listener {
         delay = getConfig().getInt("delay",20);
         HopperName = getConfig().getString("name","区块漏斗");
         hopperCount = new HashMap<>();
-        prefix = color(getConfig().getString("prefix"));
+        prefix = color(getConfig().getString("prefix", "&b[区块漏斗]"));
     }
 
     /**
@@ -276,7 +273,7 @@ public class Main extends JavaPlugin implements Listener {
      * @param text
      * @return
      */
-    private static String color(String text){
+    private static String color(String text) {
         return text.replace("&","§");
     }
 
@@ -284,7 +281,7 @@ public class Main extends JavaPlugin implements Listener {
      * 后台信息
      * @param msg
      */
-    public void print(String msg){
+    public void print(String msg) {
         Bukkit.getConsoleSender().sendMessage(color(msg));
     }
 
@@ -296,14 +293,14 @@ public class Main extends JavaPlugin implements Listener {
         try {
             URL url=new URL("https://www.ranmc.cn/plugins/chunkHopper.txt");
             InputStream is = url.openStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             lastest = br.readLine();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (lastest == null) {
             print(color(prefix + "§c检查更新失败,请检查网络"));
-        } else if(getDescription().getVersion().equalsIgnoreCase(lastest)) {
+        } else if (getDescription().getVersion().equalsIgnoreCase(lastest)) {
             print(color(prefix + "§a当前已经是最新版本"));
         } else {
             print(color(prefix + "§e检测到最新版本" + lastest));
@@ -315,7 +312,7 @@ public class Main extends JavaPlugin implements Listener {
      * @param msg
      */
     /*
-    public void say(String msg){
+    public void say(String msg) {
         Bukkit.broadcastMessage(color(msg));
     }
     */
