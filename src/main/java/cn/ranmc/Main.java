@@ -131,17 +131,17 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     private void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if(!enable) return;
+        if (!enable) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if(player != null &&
-                !event.isCancelled() &&
+        if (player != null && !event.isCancelled() &&
                 block.getType() == Material.HOPPER) {
             String chunkName = block.getChunk().toString();
             if (hopperCount.containsKey(chunkName)) {
                 int count = hopperCount.get(chunkName);
                 if (count >= getConfig().getInt("limit",32)) {
                     event.setCancelled(true);
+                    player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
                 } else {
                     hopperCount.put(chunkName, hopperCount.get(chunkName) + 1);
@@ -161,7 +161,6 @@ public class Main extends JavaPlugin implements Listener {
                         }
                     }
                     hopperCount.put(chunkName, count);
-
                 });
             }
             Hopper hopper = (Hopper) block.getState();
