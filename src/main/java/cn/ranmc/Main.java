@@ -160,7 +160,7 @@ public class Main extends JavaPlugin implements Listener {
             Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
             if (HopperName.equals(hopper.getCustomName())) {
-                if (data.getString(name)!=null) {
+                if (data.getString(name) != null) {
                     String[] xyz = data.getString(name).split("x");
                     player.sendMessage(prefix + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
                     event.setCancelled(true);
@@ -177,7 +177,7 @@ public class Main extends JavaPlugin implements Listener {
                 data.set(name,xyz.toString());
                 try {
                     data.save(yml);
-                } catch (IOException e) {}
+                } catch (IOException ignored) {}
             }
 
         }
