@@ -149,21 +149,13 @@ public class Main extends JavaPlugin implements Listener {
                     hopperCount.put(chunkName, hopperCount.get(chunkName) + 1);
                 }
             } else {
-                PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> {
-                    int count = 0;
-                    Entity[] entities = chunk.getEntities();
-                    for (Entity entity : entities) {
-                        if (entity.getType() == EntityType.MINECART_HOPPER) count++;
-                    }
-                    for (int x = 0; x < 16; x++) {
-                        for (int y = -31; y < 320; y++) {
-                            for (int z = 0; z < 16; z++) {
-                                if (chunk.getBlock(x, y, z).getType() == Material.HOPPER) count++;
-                            }
-                        }
-                    }
-                    hopperCount.put(chunkName, count);
-                });
+                player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                event.setCancelled(true);
+                if (folia) {
+                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block));
+                } else {
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countHopper(block));
+                }
             }
             Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
@@ -189,6 +181,23 @@ public class Main extends JavaPlugin implements Listener {
             }
 
         }
+    }
+
+    private void countHopper(Block block) {
+        String chunkName = block.getChunk().toString();
+        int count = 0;
+        Entity[] entities = block.getChunk().getEntities();
+        for (Entity entity : entities) {
+            if (entity.getType() == EntityType.MINECART_HOPPER) count++;
+        }
+        for (int x = 0; x < 16; x++) {
+            for (int y = -31; y < 320; y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) count++;
+                }
+            }
+        }
+        hopperCount.put(chunkName, count);
     }
 
     @EventHandler
@@ -270,8 +279,6 @@ public class Main extends JavaPlugin implements Listener {
 
     /**
      * 文本颜色
-     * @param text
-     * @return
      */
     private static String color(String text) {
         return text.replace("&","§");
@@ -279,7 +286,6 @@ public class Main extends JavaPlugin implements Listener {
 
     /**
      * 后台信息
-     * @param msg
      */
     public void print(String msg) {
         Bukkit.getConsoleSender().sendMessage(color(msg));
@@ -306,14 +312,4 @@ public class Main extends JavaPlugin implements Listener {
             print(color(prefix + "§e检测到最新版本" + lastest));
         }
     }
-
-    /**
-     * 公屏信息
-     * @param msg
-     */
-    /*
-    public void say(String msg) {
-        Bukkit.broadcastMessage(color(msg));
-    }
-    */
 }

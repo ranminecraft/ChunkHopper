@@ -7,7 +7,7 @@ name: '区块漏斗'
 # 一个区块最大漏斗上限
 limit: 32
 # 在一个方块被破坏多久之后检测
-delay: 20
+delay: 30
 # 漏斗收集物品列表
 itemList:
 - POTATO
