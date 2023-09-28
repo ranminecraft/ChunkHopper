@@ -26,18 +26,15 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
 
     private String prefix;
-    private YamlConfiguration data;
-    private File yml;
+    private YamlConfiguration data, countData;
+    private File dataYml, countYml;
     private List<String> lock = new ArrayList<>();
-    private Map<String, Integer> hopperCount;
     private boolean enable;
     private int delay;
     private String HopperName;
@@ -59,6 +56,18 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
 
         super.onEnable();
+    }
+
+    @Override
+    public void onDisable() {
+        try {
+            countData.save(countYml);
+            print("&a漏斗箱子保存数据成功");
+        } catch (IOException e) {
+            print("&c漏斗箱子保存数据失败");
+            throw new RuntimeException(e);
+        }
+        super.onDisable();
     }
 
     /**
@@ -122,7 +131,7 @@ public class Main extends JavaPlugin implements Listener {
             }
         } else {
             data.set(name, null);
-            try { data.save(yml); } catch (IOException ignore) {}
+            try { data.save(dataYml); } catch (IOException ignore) {}
         }
     }
 
@@ -139,14 +148,15 @@ public class Main extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         if (!event.isCancelled() && block.getType() == Material.HOPPER) {
             String chunkName = block.getChunk().toString();
-            if (hopperCount.containsKey(chunkName)) {
-                int count = hopperCount.get(chunkName);
+            if (countData.contains(chunkName)) {
+                int count = countData.getInt(chunkName);
                 if (count >= getConfig().getInt("limit",32)) {
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
                 } else {
-                    hopperCount.put(chunkName, hopperCount.get(chunkName) + 1);
+                    countData.set(chunkName, count + 1);
+
                 }
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
@@ -160,7 +170,7 @@ public class Main extends JavaPlugin implements Listener {
             Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
             if (HopperName.equals(hopper.getCustomName())) {
-                if (data.getString(name) != null) {
+                if (data.contains(name)) {
                     String[] xyz = data.getString(name).split("x");
                     player.sendMessage(prefix + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
                     event.setCancelled(true);
@@ -176,7 +186,7 @@ public class Main extends JavaPlugin implements Listener {
                 xyz.append(location.getBlockZ());
                 data.set(name,xyz.toString());
                 try {
-                    data.save(yml);
+                    data.save(dataYml);
                 } catch (IOException ignored) {}
             }
 
@@ -197,7 +207,7 @@ public class Main extends JavaPlugin implements Listener {
                 }
             }
         }
-        hopperCount.put(chunkName, count);
+        countData.set(chunkName, count);
     }
 
     @EventHandler
@@ -206,19 +216,19 @@ public class Main extends JavaPlugin implements Listener {
         Block block = event.getBlock();
         hopper(block.getLocation());
         Player player = event.getPlayer();
+        String chunkName = block.getChunk().toString();
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            String chunkName = block.getChunk().toString();
-            if (hopperCount.containsKey(chunkName)) hopperCount.put(chunkName, hopperCount.get(chunkName) - 1);
+            if (countData.contains(chunkName)) countData.set(chunkName, countData.getInt(chunkName) - 1);
             if (HopperName.equals(hopper.getCustomName())) {
                 player.sendMessage(prefix + color("&e你破坏了一个区块漏斗"));
                 data.set(hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ(),null);
                 try {
-                    data.save(yml);
+                    data.save(dataYml);
                 } catch (IOException ignore) {}
             }
-
         }
+
     }
 
     /**
@@ -229,6 +239,11 @@ public class Main extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("ch") && args.length==1) {
             if (args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("ch.admin")) {
+                    try {
+                        countData.save(countYml);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     loadConfig();
                     sender.sendMessage(prefix + color("&a重载成功"));
                     return true;
@@ -255,7 +270,7 @@ public class Main extends JavaPlugin implements Listener {
      * 加载配置文件
      */
     private void loadConfig() {
-        //加载config
+        // 加载config
         if (!new File(getDataFolder() + File.separator + "config.yml").exists()) {
             saveDefaultConfig();
         }
@@ -263,17 +278,22 @@ public class Main extends JavaPlugin implements Listener {
 
         lock = new ArrayList<>();
 
-        //加载数据
-        yml = new File(this.getDataFolder(), "data.yml");
-        if (!yml.exists()) {
+        // 加载数据
+        dataYml = new File(this.getDataFolder(), "data.yml");
+        if (!dataYml.exists()) {
             this.saveResource("data.yml", true);
         }
-        data = YamlConfiguration.loadConfiguration(yml);
+        data = YamlConfiguration.loadConfiguration(dataYml);
+
+        countYml = new File(this.getDataFolder(), "count.yml");
+        if (!countYml.exists()) {
+            this.saveResource("count.yml", true);
+        }
+        countData = YamlConfiguration.loadConfiguration(countYml);
 
         enable = getConfig().getBoolean("enable",true);
         delay = getConfig().getInt("delay",20);
         HopperName = getConfig().getString("name","区块漏斗");
-        hopperCount = new HashMap<>();
         prefix = color(getConfig().getString("prefix", "&b[区块漏斗]"));
     }
 
@@ -289,27 +309,5 @@ public class Main extends JavaPlugin implements Listener {
      */
     public void print(String msg) {
         Bukkit.getConsoleSender().sendMessage(color(msg));
-    }
-
-    /**
-     * 检查更新
-     */
-    public void updateCheck() {
-        String lastest = null;
-        try {
-            URL url=new URL("https://www.ranmc.cn/plugins/chunkHopper.txt");
-            InputStream is = url.openStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            lastest = br.readLine();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (lastest == null) {
-            print(color(prefix + "§c检查更新失败,请检查网络"));
-        } else if (getDescription().getVersion().equalsIgnoreCase(lastest)) {
-            print(color(prefix + "§a当前已经是最新版本"));
-        } else {
-            print(color(prefix + "§e检测到最新版本" + lastest));
-        }
     }
 }
