@@ -156,7 +156,6 @@ public class Main extends JavaPlugin implements Listener {
                     return;
                 } else {
                     countData.set(chunkName, count + 1);
-
                 }
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
@@ -194,14 +193,18 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     private void countHopper(Block block) {
-        String chunkName = block.getChunk().toString();
+        Chunk chunk = block.getChunk();
+        String chunkName = chunk.toString();
         int count = 0;
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
             if (entity.getType() == EntityType.MINECART_HOPPER) count++;
         }
+        boolean nether = chunk.getWorld().getName().equals("world_nether");
+        int minY = nether ? 1 : -31;
+        int maxY = nether ? 256 : 320;
         for (int x = 0; x < 16; x++) {
-            for (int y = -31; y < 320; y++) {
+            for (int y = minY; y < maxY; y++) {
                 for (int z = 0; z < 16; z++) {
                     if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) count++;
                 }
