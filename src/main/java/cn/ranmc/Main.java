@@ -200,9 +200,9 @@ public class Main extends JavaPlugin implements Listener {
         for (Entity entity : entities) {
             if (entity.getType() == EntityType.MINECART_HOPPER) count++;
         }
-        boolean nether = chunk.getWorld().getName().equals("world_nether");
-        int minY = nether ? 1 : -31;
-        int maxY = nether ? 256 : 320;
+        boolean natural = chunk.getWorld().isNatural();
+        int minY = natural ? -31 : 1;
+        int maxY = natural ? 320 : 256;
         for (int x = 0; x < 16; x++) {
             for (int y = minY; y < maxY; y++) {
                 for (int z = 0; z < 16; z++) {
