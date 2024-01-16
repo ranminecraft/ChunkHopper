@@ -201,7 +201,7 @@ public class Main extends JavaPlugin implements Listener {
             if (entity.getType() == EntityType.MINECART_HOPPER) count++;
         }
         boolean natural = chunk.getWorld().isNatural();
-        int minY = natural ? -31 : 1;
+        int minY = natural ? -63 : 1;
         int maxY = natural ? 320 : 256;
         for (int x = 0; x < 16; x++) {
             for (int y = minY; y < maxY; y++) {
@@ -219,10 +219,10 @@ public class Main extends JavaPlugin implements Listener {
         Block block = event.getBlock();
         hopper(block.getLocation());
         Player player = event.getPlayer();
-        String chunkName = block.getChunk().toString();
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            if (countData.contains(chunkName)) countData.set(chunkName, countData.getInt(chunkName) - 1);
+            String name = getLocationName(block.getLocation());
+            if (countData.contains(name)) countData.set(name, countData.getInt(name) - 1);
             if (HopperName.equals(hopper.getCustomName())) {
                 player.sendMessage(prefix + color("&e你破坏了一个区块漏斗"));
                 data.set(hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ(),null);
