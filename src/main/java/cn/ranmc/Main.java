@@ -22,9 +22,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,8 +43,8 @@ public class Main extends JavaPlugin implements Listener {
     public void onEnable() {
         print("&e-----------------------");
         print("&b漏斗箱子 &dBy阿然");
-        print("&b插件版本:"+getDescription().getVersion());
-        print("&b服务器版本:"+getServer().getVersion());
+        print("&b插件版本:" + getDescription().getVersion());
+        print("&b服务器版本:" + getServer().getVersion());
         print("&cQQ 2263055528");
         print("&e-----------------------");
 
@@ -147,30 +146,11 @@ public class Main extends JavaPlugin implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (!event.isCancelled() && block.getType() == Material.HOPPER) {
-            String chunkName = block.getChunk().toString();
-            if (countData.contains(chunkName)) {
-                int count = countData.getInt(chunkName);
-                if (count >= getConfig().getInt("limit",32)) {
-                    event.setCancelled(true);
-                    player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
-                    return;
-                } else {
-                    countData.set(chunkName, count + 1);
-                }
-            } else {
-                player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
-                event.setCancelled(true);
-                if (folia) {
-                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block));
-                } else {
-                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countHopper(block));
-                }
-            }
+            String name = getLocationName(block.getLocation());
             Hopper hopper = (Hopper) block.getState();
-            String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
             if (HopperName.equals(hopper.getCustomName())) {
                 if (data.contains(name)) {
-                    String[] xyz = data.getString(name).split("x");
+                    String[] xyz = Objects.requireNonNull(data.getString(name)).split("x");
                     player.sendMessage(prefix + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
                     event.setCancelled(true);
                     return;
@@ -189,12 +169,32 @@ public class Main extends JavaPlugin implements Listener {
                 } catch (IOException ignored) {}
             }
 
+            if (countData.contains(name)) {
+                int count = countData.getInt(name);
+                if (count >= getConfig().getInt("limit",32)) {
+                    event.setCancelled(true);
+                    player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                } else {
+                    countData.set(name, count + 1);
+                }
+            } else {
+                player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                event.setCancelled(true);
+                if (folia) {
+                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block));
+                } else {
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countHopper(block));
+                }
+            }
         }
+    }
+
+    private String getLocationName(Location location) {
+        return location.getWorld().getName() + location.getChunk().getX() + "x" + location.getChunk().getZ();
     }
 
     private void countHopper(Block block) {
         Chunk chunk = block.getChunk();
-        String chunkName = chunk.toString();
         int count = 0;
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
@@ -210,7 +210,7 @@ public class Main extends JavaPlugin implements Listener {
                 }
             }
         }
-        countData.set(chunkName, count);
+        countData.set(getLocationName(block.getLocation()), count);
     }
 
     @EventHandler
@@ -239,7 +239,7 @@ public class Main extends JavaPlugin implements Listener {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("ch") && args.length==1) {
+        if (cmd.getName().equalsIgnoreCase("ch") && args.length == 1) {
             if (args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("ch.admin")) {
                     try {
