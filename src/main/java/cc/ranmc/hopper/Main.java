@@ -1,6 +1,7 @@
 package cc.ranmc.hopper;
 
 import io.papermc.lib.PaperLib;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -22,6 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -47,6 +50,7 @@ public class Main extends JavaPlugin implements Listener {
     private String HopperName;
     private final boolean folia = isFolia();
     private BukkitTask task = null;
+    private ScheduledTask foliaTask = null;
     private final Map<Inventory,List<ItemStack>> map = new ConcurrentHashMap<>();
 
     @Override
@@ -61,26 +65,49 @@ public class Main extends JavaPlugin implements Listener {
         loadConfig();
         //updateCheck();
 
-        task = Bukkit.getScheduler().runTaskTimer(this, () -> {
-            map.forEach((inventory, list) -> {
-                if (inventory != null &&
-                        inventory.getHolder() != null &&
-                        list != null &&
-                        !list.isEmpty()) {
-                    if (!isInventoryFull(inventory)) {
-                        inventory.addItem(list.get(0));
-                        list.remove(0);
-                    }
-                } else {
-                    map.remove(inventory);
-                }
-            });
-        }, 20, 20);
+        if (folia) {
+            foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, task -> tickFolia(), 20, 20);
+        } else {
+            task = Bukkit.getScheduler().runTaskTimer(this, this::tick, 20, 20);
+        }
 
         //注册Event
         Bukkit.getPluginManager().registerEvents(this, this);
 
         super.onEnable();
+    }
+
+    public void tickFolia() {
+        map.forEach((inventory, list) -> {
+            if (inventory.getLocation() != null) {
+                Bukkit.getRegionScheduler().runDelayed(this, inventory.getLocation(), task -> {
+                    if (inventory.getHolder() != null && list != null && !list.isEmpty()) {
+                        if (!isInventoryFull(inventory)) {
+                            inventory.addItem(list.get(0));
+                            list.remove(0);
+                        }
+                    } else {
+                        map.remove(inventory);
+                    }
+                }, 1);
+            }
+        });
+    }
+
+    public void tick() {
+        map.forEach((inventory, list) -> {
+            if (inventory != null &&
+                    inventory.getHolder() != null &&
+                    list != null &&
+                    !list.isEmpty()) {
+                if (!isInventoryFull(inventory)) {
+                    inventory.addItem(list.get(0));
+                    list.remove(0);
+                }
+            } else {
+                map.remove(inventory);
+            }
+        });
     }
 
     public static boolean isInventoryFull(Inventory inventory) {
