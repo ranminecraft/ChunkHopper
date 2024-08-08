@@ -27,8 +27,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +78,7 @@ public class Main extends JavaPlugin implements Listener {
             if (inventory.getLocation() != null) {
                 Bukkit.getRegionScheduler().runDelayed(this, inventory.getLocation(), task -> {
                     if (inventory.getHolder() != null && list != null && !list.isEmpty()) {
-                        if (!isInventoryFull(inventory)) {
+                        if (isInventoryFull(inventory)) {
                             inventory.addItem(list.get(0));
                             list.remove(0);
                         }
@@ -98,7 +96,7 @@ public class Main extends JavaPlugin implements Listener {
                     inventory.getHolder() != null &&
                     list != null &&
                     !list.isEmpty()) {
-                if (!isInventoryFull(inventory)) {
+                if (isInventoryFull(inventory)) {
                     inventory.addItem(list.get(0));
                     list.remove(0);
                 }
@@ -111,16 +109,17 @@ public class Main extends JavaPlugin implements Listener {
     public static boolean isInventoryFull(Inventory inventory) {
         for (int i = 0; i < 5; i++) {
             if (inventory.getItem(i) == null) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
 
     @Override
     public void onDisable() {
         if (task != null) task.cancel();
+        if (foliaTask != null) foliaTask.cancel();
         super.onDisable();
     }
 
@@ -230,7 +229,7 @@ public class Main extends JavaPlugin implements Listener {
             String name = hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ();
             if (HopperName.equals(hopper.getCustomName())) {
                 if (data.getString(name) != null) {
-                    String[] xyz = data.getString(name).split("x");
+                    String[] xyz = Objects.requireNonNull(data.getString(name)).split("x");
                     player.sendMessage(prefix + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
                     event.setCancelled(true);
                     return;
@@ -358,27 +357,5 @@ public class Main extends JavaPlugin implements Listener {
      */
     public void print(String msg) {
         Bukkit.getConsoleSender().sendMessage(color(msg));
-    }
-
-    /**
-     * 检查更新
-     */
-    public void updateCheck() {
-        String lastest = null;
-        try {
-            URL url=new URL("https://www.ranmc.cn/plugins/chunkHopper.txt");
-            InputStream is = url.openStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            lastest = br.readLine();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (lastest == null) {
-            print(color(prefix + "§c检查更新失败,请检查网络"));
-        } else if (getDescription().getVersion().equalsIgnoreCase(lastest)) {
-            print(color(prefix + "§a当前已经是最新版本"));
-        } else {
-            print(color(prefix + "§e检测到最新版本" + lastest));
-        }
     }
 }
