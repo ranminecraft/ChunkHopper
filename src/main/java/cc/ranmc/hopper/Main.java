@@ -198,13 +198,13 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     private void onEntityDropItemEvent(EntityDropItemEvent event) {
-        if (!enable) return;
+        if (!enable && !getConfig().getBoolean("entity", true)) return;
         hopper(event.getEntity().getLocation());
     }
 
     @EventHandler
     private void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
-        if (!enable) return;
+        if (!enable && !getConfig().getBoolean("piston", true)) return;
         hopper(event.getBlock().getLocation());
     }
 
@@ -281,7 +281,9 @@ public class Main extends JavaPlugin implements Listener {
     private void onBlockBreakEvent(BlockBreakEvent event) {
         if (!enable) return;
         Block block = event.getBlock();
-        hopper(block.getLocation());
+        if (getConfig().getBoolean("block", true)) {
+            hopper(block.getLocation());
+        }
         Player player = event.getPlayer();
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
