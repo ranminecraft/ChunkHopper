@@ -20,7 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -173,9 +173,7 @@ public class Main extends JavaPlugin implements Listener {
                 Integer.parseInt(xyz[2]));
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            String customName = hopper.getCustomName();
-            if (customName != null && !customName.isEmpty()) return;
-            List<String> itemList = chunkYml.getStringList(customName);
+            List<String> itemList = chunkYml.getStringList(hopper.getCustomName());
             for (Entity entity : entities) {
                 if (entity.getType() == EntityType.DROPPED_ITEM) {
                     Item item = (Item) entity;
@@ -197,7 +195,7 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    private void onEntityDropItemEvent(EntityDropItemEvent event) {
+    private void onEntityDeathEvent(EntityDeathEvent event) {
         if (!enable && !getConfig().getBoolean("entity", true)) return;
         hopper(event.getEntity().getLocation());
     }
@@ -236,6 +234,7 @@ public class Main extends JavaPlugin implements Listener {
             }
             Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
+            if (hopper.getCustomName() == null) return;
             if (chunkYml.contains(hopper.getCustomName())) {
                 if (dataYml.getString(name) != null) {
                     String[] xyz = Objects.requireNonNull(dataYml.getString(name)).split("x");
@@ -289,6 +288,7 @@ public class Main extends JavaPlugin implements Listener {
             Hopper hopper = (Hopper) block.getState();
             String chunkName = block.getChunk().toString();
             if (hopperCount.containsKey(chunkName)) hopperCount.put(chunkName, hopperCount.get(chunkName) - 1);
+            if (hopper.getCustomName() == null) return;
             if (chunkYml.contains(hopper.getCustomName())) {
                 player.sendMessage(prefix + color("&e你破坏了一个区块漏斗"));
                 dataYml.set(hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ(),null);
