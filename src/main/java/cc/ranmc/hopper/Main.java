@@ -20,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -193,6 +194,12 @@ public class Main extends JavaPlugin implements Listener {
                 dataYml.save(dataFile);
             } catch (IOException ignore) {}
         }
+    }
+
+    @EventHandler
+    private void onEntityDropItemEvent(EntityDropItemEvent event) {
+        if (!enable) return;
+        hopper(event.getEntity().getLocation());
     }
 
     @EventHandler
