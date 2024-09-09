@@ -172,7 +172,9 @@ public class Main extends JavaPlugin implements Listener {
                 Integer.parseInt(xyz[2]));
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            List<String> itemList = chunkYml.getStringList(hopper.getCustomName());
+            String customName = hopper.getCustomName();
+            if (customName != null && !customName.isEmpty()) return;
+            List<String> itemList = chunkYml.getStringList(customName);
             for (Entity entity : entities) {
                 if (entity.getType() == EntityType.DROPPED_ITEM) {
                     Item item = (Item) entity;
