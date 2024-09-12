@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cc.ranmc.hopper.utils.BaseUtil.print;
+
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
@@ -42,8 +44,9 @@ public class HopperUtil {
                 count++;
             }
         }
+
         for (int x = 0; x < 16; x++) {
-            for (int y = -31; y < 320; y++) {
+            for (int y = block.getWorld().getMinHeight(); y < block.getWorld().getMaxHeight(); y++) {
                 for (int z = 0; z < 16; z++) {
                     if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) {
                         count++;
