@@ -22,6 +22,11 @@ public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
 
+    public static String getKey(Hopper hopper) {
+        return hopper.getWorld().getName() + hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
+    }
+
+
     /**
      * 计算区块漏斗数量
      */

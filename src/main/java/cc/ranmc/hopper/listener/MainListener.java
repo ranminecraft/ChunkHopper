@@ -22,6 +22,7 @@ import java.util.Objects;
 import static cc.ranmc.hopper.Main.PREFIX;
 import static cc.ranmc.hopper.utils.BaseUtil.color;
 import static cc.ranmc.hopper.utils.HopperUtil.countHopper;
+import static cc.ranmc.hopper.utils.HopperUtil.getKey;
 import static cc.ranmc.hopper.utils.HopperUtil.hopper;
 
 public class MainListener implements Listener {
@@ -85,12 +86,12 @@ public class MainListener implements Listener {
                 return;
             }
             Hopper hopper = (Hopper) block.getState();
-            String name = hopper.getWorld().getName()+hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
+            String key = getKey(hopper);
             if (hopper.getCustomName() == null) return;
             if (plugin.getChunkYml().contains(hopper.getCustomName())) {
-                if (plugin.getDataYml().getString(name) != null) {
-                    String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(name)).split("x");
-                    player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x"+xyz[0]+" y"+xyz[1]+" z"+xyz[2]));
+                if (plugin.getDataYml().getString(key) != null) {
+                    String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(key)).split("x");
+                    player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
                     event.setCancelled(true);
                     return;
                 }
@@ -102,12 +103,11 @@ public class MainListener implements Listener {
                 xyz.append(location.getBlockY());
                 xyz.append("x");
                 xyz.append(location.getBlockZ());
-                plugin.getDataYml().set(name,xyz.toString());
+                plugin.getDataYml().set(key, xyz.toString());
                 try {
                     plugin.getDataYml().save(plugin.getDataFile());
                 } catch (IOException ignored) {}
             }
-
         }
     }
 
@@ -129,7 +129,7 @@ public class MainListener implements Listener {
             if (hopper.getCustomName() == null) return;
             if (plugin.getChunkYml().contains(hopper.getCustomName())) {
                 player.sendMessage(PREFIX + color("&e你破坏了一个区块漏斗"));
-                plugin.getDataYml().set(hopper.getWorld().getName()+hopper.getChunk().getX()+"x"+hopper.getChunk().getZ(),null);
+                plugin.getDataYml().set(getKey(hopper), null);
                 try {
                     plugin.getDataYml().save(plugin.getDataFile());
                 } catch (IOException ignore) {}
