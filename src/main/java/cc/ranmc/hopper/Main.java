@@ -10,7 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +19,7 @@ import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -171,12 +171,10 @@ public class Main extends JavaPlugin implements Listener {
         Block block = location.getWorld().getBlockAt(Integer.parseInt(xyz[0]),
                 Integer.parseInt(xyz[1]),
                 Integer.parseInt(xyz[2]));
-        if (block.getType() == Material.HOPPER) {
-            Hopper hopper = (Hopper) block.getState();
+        if (block.getState() instanceof Hopper hopper) {
             List<String> itemList = chunkYml.getStringList(hopper.getCustomName());
             for (Entity entity : entities) {
-                if (entity.getType() == EntityType.DROPPED_ITEM) {
-                    Item item = (Item) entity;
+                if (entity instanceof Item item) {
                     if (itemList.contains(item.getItemStack().getType().toString())) {
                         Inventory inventory = hopper.getInventory();
                         List<ItemStack> list = map.getOrDefault(inventory, new ArrayList<>());
@@ -191,6 +189,20 @@ public class Main extends JavaPlugin implements Listener {
             try {
                 dataYml.save(dataFile);
             } catch (IOException ignore) {}
+        }
+    }
+    @EventHandler
+    public void onEntityExplodeEvent(EntityExplodeEvent event) {
+        if (!enable || event.isCancelled()) return;
+        for (Block block : event.blockList()){
+            if (block.getState() instanceof Hopper) {
+                if (folia) {
+                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block.getChunk()));
+                } else {
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(this::countHopper);
+                }
+                return;
+            }
         }
     }
 
@@ -208,7 +220,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBlockGrowEvent(BlockGrowEvent event) {
-        if (!enable) return;
+        if (!enable || event.isCancelled()) return;
         if(event.getNewState().getType() == Material.CACTUS ) {
             hopper(event.getBlock().getLocation());
         }
@@ -216,10 +228,10 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     private void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (!enable) return;
+        if (!enable || event.isCancelled()) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if (!event.isCancelled() && block.getType() == Material.HOPPER) {
+        if (block.getState() instanceof Hopper hopper) {
             Integer count = getCountHoppers(block);
             if(count != 0){
                 if (count >= getConfig().getInt("limit",32)){
@@ -239,7 +251,6 @@ public class Main extends JavaPlugin implements Listener {
                 }
                 return;
             }
-            Hopper hopper = (Hopper) block.getState();
             String name = hopper.getWorld().getName()+hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
             if (hopper.getCustomName() == null) return;
             if (chunkYml.contains(hopper.getCustomName())) {
@@ -299,14 +310,13 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     private void onBlockBreakEvent(BlockBreakEvent event) {
-        if (!enable) return;
+        if (!enable || event.isCancelled()) return;
         Block block = event.getBlock();
         if (getConfig().getBoolean("block", true)) {
             hopper(block.getLocation());
         }
         Player player = event.getPlayer();
-        if (block.getType() == Material.HOPPER) {
-            Hopper hopper = (Hopper) block.getState();
+        if (block.getState() instanceof Hopper hopper) {
             Integer count = getCountHoppers(block);
             if(count != 0){
                 block.getChunk().getPersistentDataContainer().set(countHoppersKey, PersistentDataType.INTEGER, count - 1);
