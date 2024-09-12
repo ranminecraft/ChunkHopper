@@ -6,6 +6,9 @@ piston: true
 entity: true
 # 方块被破坏后收集
 block: true
+# 作物生长后收集
+grow: true
+
 # 插件前缀
 prefix: "&b[区块漏斗]"
 # 一个区块最大漏斗上限

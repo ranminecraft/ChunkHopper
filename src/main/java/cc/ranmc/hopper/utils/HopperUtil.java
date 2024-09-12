@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cc.ranmc.hopper.utils.BaseUtil.print;
+
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
@@ -26,13 +28,17 @@ public class HopperUtil {
         return hopper.getWorld().getName() + hopper.getChunk().getX() + "x" + hopper.getChunk().getZ();
     }
 
+    public static String getKey(Chunk chunk) {
+        return chunk.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+    }
+
 
     /**
      * 计算区块漏斗数量
      */
     public static void countHopper(Block block) {
-        String chunkName = block.getChunk().toString();
         int count = 0;
+        print(getKey(block.getChunk()) + " " + count);
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
             if (entity.getType() == EntityType.MINECART_HOPPER) {
@@ -42,11 +48,14 @@ public class HopperUtil {
         for (int x = 0; x < 16; x++) {
             for (int y = -31; y < 320; y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) count++;
+                    if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) {
+                        count++;
+                    }
                 }
             }
         }
-        Main.getInstance().getHopperCount().put(chunkName, count);
+        print(getKey(block.getChunk()) + " " + count);
+        Main.getInstance().getHopperCount().put(getKey(block.getChunk()), count);
     }
 
     /**

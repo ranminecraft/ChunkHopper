@@ -65,15 +65,15 @@ public class MainListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (!event.isCancelled() && block.getType() == Material.HOPPER) {
-            String chunkName = block.getChunk().toString();
-            if (plugin.getHopperCount().containsKey(chunkName)) {
-                int count = plugin.getHopperCount().get(chunkName);
+            String chunkKey = getKey(block.getChunk());
+            if (plugin.getHopperCount().containsKey(chunkKey)) {
+                int count = plugin.getHopperCount().get(chunkKey);
                 if (count >= plugin.getConfig().getInt("limit",32)) {
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
                 } else {
-                    plugin.getHopperCount().put(chunkName, plugin.getHopperCount().get(chunkName) + 1);
+                    plugin.getHopperCount().put(chunkKey, plugin.getHopperCount().get(chunkKey) + 1);
                 }
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
@@ -121,10 +121,10 @@ public class MainListener implements Listener {
         Player player = event.getPlayer();
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            String chunkName = block.getChunk().toString();
-            if (plugin.getHopperCount().containsKey(chunkName)) {
-                plugin.getHopperCount().put(chunkName,
-                        plugin.getHopperCount().get(chunkName) - 1);
+            String chunkKey = getKey(block.getChunk());
+            if (plugin.getHopperCount().containsKey(chunkKey)) {
+                plugin.getHopperCount().put(chunkKey,
+                        plugin.getHopperCount().get(chunkKey) - 1);
             }
             if (hopper.getCustomName() == null) return;
             if (plugin.getChunkYml().contains(hopper.getCustomName())) {
