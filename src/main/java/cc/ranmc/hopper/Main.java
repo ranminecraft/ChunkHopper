@@ -2,11 +2,9 @@ package cc.ranmc.hopper;
 
 import io.papermc.lib.PaperLib;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,18 +16,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,13 +41,13 @@ public class Main extends JavaPlugin implements Listener {
     private YamlConfiguration dataYml, chunkYml;
     private File dataFile, chunkFile;
     private List<String> lock = new ArrayList<>();
-    private Map<String, Integer> hopperCount;
     private boolean enable;
     private int delay;
     private final boolean folia = isFolia();
     private BukkitTask task = null;
     private ScheduledTask foliaTask = null;
     private final Map<Inventory,List<ItemStack>> map = new ConcurrentHashMap<>();
+    private final NamespacedKey countHoppersKey = new NamespacedKey(this, "countHoppers");
 
     @Override
     public void onEnable() {
@@ -78,8 +78,8 @@ public class Main extends JavaPlugin implements Listener {
                 Bukkit.getRegionScheduler().runDelayed(this, inventory.getLocation(), task -> {
                     if (inventory.getHolder() != null && list != null && !list.isEmpty()) {
                         if (isInventoryFull(inventory)) {
-                            inventory.addItem(list.get(0));
-                            list.remove(0);
+                            inventory.addItem(list.getFirst());
+                            list.removeFirst();
                         }
                     } else {
                         map.remove(inventory);
@@ -96,8 +96,8 @@ public class Main extends JavaPlugin implements Listener {
                     list != null &&
                     !list.isEmpty()) {
                 if (isInventoryFull(inventory)) {
-                    inventory.addItem(list.get(0));
-                    list.remove(0);
+                    inventory.addItem(list.getFirst());
+                    list.removeFirst();
                 }
             } else {
                 map.remove(inventory);
@@ -207,28 +207,35 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onBlockGrowEvent(BlockGrowEvent event) {
+        if (!enable) return;
+        if(event.getNewState().getType() == Material.CACTUS ) {
+            hopper(event.getBlock().getLocation());
+        }
+    }
+
+    @EventHandler
     private void onBlockPlaceEvent(BlockPlaceEvent event) {
         if (!enable) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (!event.isCancelled() && block.getType() == Material.HOPPER) {
-            String chunkName = block.getChunk().toString();
-            if (hopperCount.containsKey(chunkName)) {
-                int count = hopperCount.get(chunkName);
-                if (count >= getConfig().getInt("limit",32)) {
+            Integer count = getCountHoppers(block);
+            if(count != 0){
+                if (count >= getConfig().getInt("limit",32)){
                     event.setCancelled(true);
                     player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
                 } else {
-                    hopperCount.put(chunkName, hopperCount.get(chunkName) + 1);
+                    block.getChunk().getPersistentDataContainer().set(countHoppersKey, PersistentDataType.INTEGER, count + 1);
                 }
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                 event.setCancelled(true);
                 if (folia) {
-                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block));
+                    Bukkit.getRegionScheduler().run(this, block.getLocation(), scheduledTask -> countHopper(block.getChunk()));
                 } else {
-                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countHopper(block));
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(this::countHopper);
                 }
                 return;
             }
@@ -259,21 +266,35 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    private void countHopper(Block block) {
-        String chunkName = block.getChunk().toString();
+    private void countHopper(Chunk chunk) {
         int count = 0;
-        Entity[] entities = block.getChunk().getEntities();
-        for (Entity entity : entities) {
-            if (entity.getType() == EntityType.MINECART_HOPPER) count++;
-        }
-        for (int x = 0; x < 16; x++) {
-            for (int y = -31; y < 320; y++) {
-                for (int z = 0; z < 16; z++) {
-                    if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) count++;
-                }
+        BlockState[] tileEntities = chunk.getTileEntities();
+        for (BlockState tileEntity : tileEntities) {
+            if(tileEntity instanceof Hopper){
+                count++;
             }
         }
-        hopperCount.put(chunkName, count);
+//        Entity[] entities = chunk.getEntities();
+//        for (Entity entity : entities) {
+//            if (entity.getType() == EntityType.HOPPER_MINECART) count++;
+//        }
+//        for (int x = 0; x < 16; x++) {
+//            for (int y = -31; y < 320; y++) {
+//                for (int z = 0; z < 16; z++) {
+//                    if (chunk.getBlock(x, y, z).getType() == Material.HOPPER) count++;
+//                }
+//            }
+//        }
+        chunk.getPersistentDataContainer().set(countHoppersKey, PersistentDataType.INTEGER, count);
+    }
+
+    private Integer getCountHoppers(Block block){
+        Chunk chunk = block.getChunk();
+        PersistentDataContainer container = chunk.getPersistentDataContainer();
+        if (container.has(countHoppersKey, PersistentDataType.INTEGER)) {
+            return container.get(countHoppersKey, PersistentDataType.INTEGER);
+        }
+        return 0;
     }
 
     @EventHandler
@@ -286,8 +307,10 @@ public class Main extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            String chunkName = block.getChunk().toString();
-            if (hopperCount.containsKey(chunkName)) hopperCount.put(chunkName, hopperCount.get(chunkName) - 1);
+            Integer count = getCountHoppers(block);
+            if(count != 0){
+                block.getChunk().getPersistentDataContainer().set(countHoppersKey, PersistentDataType.INTEGER, count - 1);
+            }
             if (hopper.getCustomName() == null) return;
             if (chunkYml.contains(hopper.getCustomName())) {
                 player.sendMessage(prefix + color("&e你破坏了一个区块漏斗"));
@@ -358,7 +381,6 @@ public class Main extends JavaPlugin implements Listener {
         enable = getConfig().getBoolean("enable",true);
         delay = getConfig().getInt("delay",30);
 
-        hopperCount = new HashMap<>();
         prefix = color(getConfig().getString("prefix", "&b[区块漏斗]"));
     }
 
