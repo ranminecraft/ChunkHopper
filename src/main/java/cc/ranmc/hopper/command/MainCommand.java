@@ -19,7 +19,7 @@ public class MainCommand implements CommandExecutor {
                              @NotNull String label,
                              String[] args) {
 
-        if (cmd.getName().equalsIgnoreCase("ch") && args.length == 1) {
+        if (args.length == 1) {
             if (args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("ch.admin")) {
                     ConfigUtil.reload();
