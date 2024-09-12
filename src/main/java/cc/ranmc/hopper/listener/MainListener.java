@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -28,20 +29,38 @@ public class MainListener implements Listener {
     private static final Main plugin = Main.getInstance();
 
     @EventHandler
+    private void onBlockGrowEvent(BlockGrowEvent event) {
+        if (!plugin.isEnable() &&
+                event.isCancelled() &&
+                !plugin.getConfig().getBoolean("grow", true)) {
+            return;
+        }
+        hopper(event.getBlock().getLocation());
+    }
+
+    @EventHandler
     private void onEntityDeathEvent(EntityDeathEvent event) {
-        if (!plugin.isEnable() && !plugin.getConfig().getBoolean("entity", true)) return;
+        if (!plugin.isEnable() &&
+                event.isCancelled() &&
+                !plugin.getConfig().getBoolean("entity", true)) {
+            return;
+        }
         hopper(event.getEntity().getLocation());
     }
 
     @EventHandler
     private void onBlockPistonExtendEvent(BlockPistonExtendEvent event) {
-        if (!plugin.isEnable() && !plugin.getConfig().getBoolean("piston", true)) return;
+        if (!plugin.isEnable() &&
+                event.isCancelled() &&
+                !plugin.getConfig().getBoolean("piston", true)) {
+            return;
+        }
         hopper(event.getBlock().getLocation());
     }
 
     @EventHandler
     private void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (!plugin.isEnable()) return;
+        if (!plugin.isEnable() && event.isCancelled()) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (!event.isCancelled() && block.getType() == Material.HOPPER) {
@@ -94,7 +113,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     private void onBlockBreakEvent(BlockBreakEvent event) {
-        if (!plugin.isEnable()) return;
+        if (!plugin.isEnable() && event.isCancelled()) return;
         Block block = event.getBlock();
         if (plugin.getConfig().getBoolean("block", true)) {
             hopper(block.getLocation());

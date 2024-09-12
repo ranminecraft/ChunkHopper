@@ -77,6 +77,7 @@ public class Main extends JavaPlugin implements Listener {
 
         // 注册监听器
         Bukkit.getPluginManager().registerEvents(new MainListener(), this);
+
         // 注册指令
         MainCommand command = new MainCommand();
         Objects.requireNonNull(Bukkit.getPluginCommand("ch")).setExecutor(command);
