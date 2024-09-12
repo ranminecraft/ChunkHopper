@@ -22,7 +22,7 @@ public class ConfigUtil {
         }
         plugin.reloadConfig();
 
-        plugin.setLock(new ArrayList<>());
+        plugin.setLockList(new ArrayList<>());
 
         // 加载数据
         plugin.setChunkFile(new File(plugin.getDataFolder(), "chunk.yml"));
@@ -40,7 +40,7 @@ public class ConfigUtil {
         plugin.setEnable(plugin.getConfig().getBoolean("enable",true));
         plugin.setDelay(plugin.getConfig().getInt("delay",30));
 
-        plugin.setHopperCount(new HashMap<>());
+        plugin.setHopperCountMap(new HashMap<>());
         Main.PREFIX = color(plugin.getConfig().getString("prefix", "&b[区块漏斗]"));
     }
 }

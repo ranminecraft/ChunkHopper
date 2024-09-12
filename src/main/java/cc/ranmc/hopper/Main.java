@@ -40,10 +40,10 @@ public class Main extends JavaPlugin implements Listener {
     private File dataFile, chunkFile;
     @Getter
     @Setter
-    private List<String> lock = new ArrayList<>();
+    private List<String> lockList = new ArrayList<>();
     @Getter
     @Setter
-    private Map<String, Integer> hopperCount;
+    private Map<String, Integer> hopperCountMap;
     @Getter
     @Setter
     private boolean enable;

@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static cc.ranmc.hopper.utils.BaseUtil.print;
-
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
@@ -38,7 +36,6 @@ public class HopperUtil {
      */
     public static void countHopper(Block block) {
         int count = 0;
-        print(getKey(block.getChunk()) + " " + count);
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
             if (entity.getType() == EntityType.MINECART_HOPPER) {
@@ -54,8 +51,7 @@ public class HopperUtil {
                 }
             }
         }
-        print(getKey(block.getChunk()) + " " + count);
-        Main.getInstance().getHopperCount().put(getKey(block.getChunk()), count);
+        Main.getInstance().getHopperCountMap().put(getKey(block.getChunk()), count);
     }
 
     /**
@@ -64,10 +60,10 @@ public class HopperUtil {
     public static void hopper(Location location) {
         Chunk chunk = location.getChunk();
         String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-        if (plugin.getLock().contains(name)) {
+        if (plugin.getLockList().contains(name)) {
             return;
         } else {
-            plugin.getLock().add(name);
+            plugin.getLockList().add(name);
         }
 
         if (plugin.isFolia()) {
@@ -89,7 +85,7 @@ public class HopperUtil {
      * 添加物品到区块漏斗
      */
     private static void hopperAddItem(Location location, Chunk chunk, String name) {
-        plugin.getLock().remove(name);
+        plugin.getLockList().remove(name);
         if (!plugin.isEnable() || !chunk.isLoaded() || plugin.getDataYml().getString(name) == null) return;
         Entity[] entities = chunk.getEntities();
         String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(name)).split("x");
