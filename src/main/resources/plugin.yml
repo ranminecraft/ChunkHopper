@@ -16,3 +16,7 @@ commands:
   ch:
     description: ch
     usage: /<command>
+
+  chunkhopper:
+    description: chunkhopper
+    usage: /<command>
