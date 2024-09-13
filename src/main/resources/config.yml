@@ -8,7 +8,7 @@ entity: true
 block: true
 # 作物生长后收集
 grow: true
-# TNT爆炸破坏方块收集
+# 爆炸破坏方块后收集
 explode: true
 
 # 插件前缀

@@ -11,10 +11,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -28,13 +30,22 @@ import static cc.ranmc.hopper.utils.HopperUtil.hopper;
 public class MainListener implements Listener {
 
     private static final Main plugin = Main.getInstance();
+
+    @EventHandler
+    public void onBlockExplodeEvent(BlockExplodeEvent event) {
+        if (!plugin.isEnable() &&
+                event.isCancelled() &&
+                !plugin.getConfig().getBoolean("explode", true)) {
+            return;
+        }
+        hopper(event.getBlock().getLocation());
+    }
     
     @EventHandler
     public void onEntityExplodeEvent(EntityExplodeEvent event) {
         if (!plugin.isEnable() &&
                 event.isCancelled() &&
-                !plugin.getConfig().getBoolean("explode", true) &&
-                event.getEntityType() != EntityType.TNT) {
+                !plugin.getConfig().getBoolean("explode", true)) {
             return;
         }
         hopper(event.getLocation());
