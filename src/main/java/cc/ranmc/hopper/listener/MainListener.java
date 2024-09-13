@@ -75,7 +75,7 @@ public class MainListener implements Listener {
         if (!plugin.isEnable() && event.isCancelled()) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if (!event.isCancelled() && block.getType() == Material.HOPPER) {
+        if (block.getType() == Material.HOPPER) {
             String chunkKey = getKey(block.getChunk());
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                 int count = plugin.getHopperCountMap().get(chunkKey);
