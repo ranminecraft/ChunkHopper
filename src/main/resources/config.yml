@@ -2,12 +2,14 @@
 enable: true
 # 活塞推出物品后收集
 piston: true
-# 生物丢弃或掉落物品后收集
+# 生物死亡掉落物品后收集
 entity: true
 # 方块被破坏后收集
 block: true
 # 作物生长后收集
 grow: true
+# TNT爆炸破坏方块收集
+explode: true
 
 # 插件前缀
 prefix: "&b[区块漏斗]"
