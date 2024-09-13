@@ -3,7 +3,7 @@ main: cc.ranmc.hopper.Main
 description: '桃花源定制24k纯钛合金超级无敌终终终终极版的漏斗箱子插件'
 website: https://www.ranmc.cc/
 author: Ranica
-version: Release 4.0
+version: Release 4.1
 api-version: "1.13"
 folia-supported: true
 
