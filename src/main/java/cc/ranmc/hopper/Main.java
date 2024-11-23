@@ -46,6 +46,9 @@ public class Main extends JavaPlugin implements Listener {
     private Map<String, Integer> hopperCountMap;
     @Getter
     @Setter
+    private Map<String, Integer> redStoneCountMap;
+    @Getter
+    @Setter
     private boolean enable;
     @Getter
     @Setter

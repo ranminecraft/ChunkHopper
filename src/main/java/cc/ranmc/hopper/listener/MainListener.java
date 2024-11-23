@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import static cc.ranmc.hopper.Main.PREFIX;
 import static cc.ranmc.hopper.utils.BaseUtil.color;
-import static cc.ranmc.hopper.utils.HopperUtil.countHopper;
+import static cc.ranmc.hopper.utils.HopperUtil.countBlock;
 import static cc.ranmc.hopper.utils.HopperUtil.getKey;
 import static cc.ranmc.hopper.utils.HopperUtil.hopper;
 
@@ -86,8 +86,30 @@ public class MainListener implements Listener {
         if (!plugin.isEnable() && event.isCancelled()) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
+        String chunkKey = getKey(block.getChunk());
+        if (plugin.getConfig().getBoolean("redstone", false) &&
+                block.getType() == Material.REDSTONE_WIRE) {
+            if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
+                int count = plugin.getRedStoneCountMap().get(chunkKey);
+                if (count >= plugin.getConfig().getInt("redstone-limit",128)) {
+                    event.setCancelled(true);
+                    player.sendMessage(color("&c该区块存在红石已达上限"));
+                    return;
+                } else {
+                    plugin.getRedStoneCountMap().put(chunkKey, plugin.getRedStoneCountMap().get(chunkKey) + 1);
+                }
+            } else {
+                player.sendMessage(color("&e该区块计算红石中请稍后"));
+                event.setCancelled(true);
+                if (plugin.isFolia()) {
+                    Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
+                } else {
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
+                }
+                return;
+            }
+        }
         if (block.getType() == Material.HOPPER) {
-            String chunkKey = getKey(block.getChunk());
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                 int count = plugin.getHopperCountMap().get(chunkKey);
                 if (count >= plugin.getConfig().getInt("limit",32)) {
@@ -101,9 +123,9 @@ public class MainListener implements Listener {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                 event.setCancelled(true);
                 if (plugin.isFolia()) {
-                    Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countHopper(block));
+                    Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
                 } else {
-                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countHopper(block));
+                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 }
                 return;
             }

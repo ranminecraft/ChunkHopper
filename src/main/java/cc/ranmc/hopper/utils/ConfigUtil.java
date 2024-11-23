@@ -41,6 +41,7 @@ public class ConfigUtil {
         plugin.setDelay(plugin.getConfig().getInt("delay",30));
 
         plugin.setHopperCountMap(new HashMap<>());
+        plugin.setRedStoneCountMap(new HashMap<>());
         Main.PREFIX = color(plugin.getConfig().getString("prefix", "&b[区块漏斗]"));
     }
 }

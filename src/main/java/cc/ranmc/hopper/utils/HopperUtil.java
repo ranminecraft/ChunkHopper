@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static cc.ranmc.hopper.utils.BaseUtil.print;
-
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
@@ -32,16 +30,16 @@ public class HopperUtil {
         return chunk.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
     }
 
-
     /**
      * 计算区块漏斗数量
      */
-    public static void countHopper(Block block) {
-        int count = 0;
+    public static void countBlock(Block block) {
+        int hopper = 0;
+        int redStone = 0;
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
             if (entity.getType() == EntityType.MINECART_HOPPER) {
-                count++;
+                hopper++;
             }
         }
 
@@ -49,12 +47,16 @@ public class HopperUtil {
             for (int y = block.getWorld().getMinHeight(); y < block.getWorld().getMaxHeight(); y++) {
                 for (int z = 0; z < 16; z++) {
                     if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) {
-                        count++;
+                        hopper++;
+                    }
+                    if (block.getChunk().getBlock(x, y, z).getType() == Material.REDSTONE) {
+                        redStone++;
                     }
                 }
             }
         }
-        Main.getInstance().getHopperCountMap().put(getKey(block.getChunk()), count);
+        Main.getInstance().getHopperCountMap().put(getKey(block.getChunk()), hopper);
+        Main.getInstance().getRedStoneCountMap().put(getKey(block.getChunk()), redStone);
     }
 
     /**

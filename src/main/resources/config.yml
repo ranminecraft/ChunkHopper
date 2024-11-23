@@ -17,3 +17,8 @@ prefix: "&b[区块漏斗]"
 limit: 32
 # 在一个方块被破坏多久之后检测
 delay: 30
+
+# 限制红石最大数量
+redstone: true
+# 一个区块最大红石上限
+redstone-limit: 128
