@@ -49,7 +49,7 @@ public class HopperUtil {
                     if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) {
                         hopper++;
                     }
-                    if (block.getChunk().getBlock(x, y, z).getType() == Material.REDSTONE) {
+                    if (block.getChunk().getBlock(x, y, z).getType() == Material.REDSTONE_WIRE) {
                         redStone++;
                     }
                 }
