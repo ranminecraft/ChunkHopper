@@ -93,13 +93,13 @@ public class MainListener implements Listener {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
                 if (count >= plugin.getConfig().getInt("redstone-limit",128)) {
                     event.setCancelled(true);
-                    player.sendMessage(color("&c该区块存在红石已达上限"));
+                    player.sendMessage(color("&c该区块存在红石已达上限\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
                     return;
                 } else {
                     plugin.getRedStoneCountMap().put(chunkKey, plugin.getRedStoneCountMap().get(chunkKey) + 1);
                 }
             } else {
-                player.sendMessage(color("&e该区块计算红石中请稍后"));
+                player.sendMessage(color("&e该区块计算红石中请稍后\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
                 event.setCancelled(true);
                 if (plugin.isFolia()) {
                     Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
