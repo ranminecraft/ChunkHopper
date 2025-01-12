@@ -63,24 +63,36 @@ public class HopperUtil {
      * 储存掉落物
      */
     public static void hopper(Location location) {
-        Chunk chunk = location.getChunk();
-        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-        if (plugin.getLockList().contains(name)) {
-            return;
-        } else {
-            plugin.getLockList().add(name);
-        }
+
 
         if (plugin.isFolia()) {
             Bukkit.getServer().getRegionScheduler().runDelayed(
                     plugin,
                     location,
-                    scheduledTask -> hopperAddItem(location, chunk, name),
+                    scheduledTask -> {
+                        Chunk chunk = location.getChunk();
+                        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+                        if (plugin.getLockList().contains(name)) {
+                            return;
+                        } else {
+                            plugin.getLockList().add(name);
+                        }
+                        hopperAddItem(location, chunk, name);
+                    },
                     plugin.getDelay());
         } else {
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
                     plugin,
-                    () -> hopperAddItem(location, chunk, name),
+                    () -> {
+                        Chunk chunk = location.getChunk();
+                        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+                        if (plugin.getLockList().contains(name)) {
+                            return;
+                        } else {
+                            plugin.getLockList().add(name);
+                        }
+                        hopperAddItem(location, chunk, name);
+                    },
                     plugin.getDelay());
         }
 
