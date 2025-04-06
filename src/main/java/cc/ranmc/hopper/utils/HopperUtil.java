@@ -66,34 +66,27 @@ public class HopperUtil {
 
 
         if (plugin.isFolia()) {
-            Bukkit.getServer().getRegionScheduler().runDelayed(
-                    plugin,
-                    location,
-                    scheduledTask -> {
-                        Chunk chunk = location.getChunk();
-                        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-                        if (plugin.getLockList().contains(name)) {
-                            return;
-                        } else {
-                            plugin.getLockList().add(name);
-                        }
-                        hopperAddItem(location, chunk, name);
-                    },
-                    plugin.getDelay());
+            Bukkit.getServer().getRegionScheduler().runDelayed(plugin, location,scheduledTask -> {
+                Chunk chunk = location.getChunk();
+                String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+                if (plugin.getLockList().contains(name)) {
+                    return;
+                } else {
+                    plugin.getLockList().add(name);
+                }
+                hopperAddItem(location, chunk, name);
+            }, plugin.getDelay());
         } else {
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
-                    plugin,
-                    () -> {
-                        Chunk chunk = location.getChunk();
-                        String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
-                        if (plugin.getLockList().contains(name)) {
-                            return;
-                        } else {
-                            plugin.getLockList().add(name);
-                        }
-                        hopperAddItem(location, chunk, name);
-                    },
-                    plugin.getDelay());
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+                Chunk chunk = location.getChunk();
+                String name = location.getWorld().getName() + chunk.getX() + "x" + chunk.getZ();
+                if (plugin.getLockList().contains(name)) {
+                    return;
+                } else {
+                    plugin.getLockList().add(name);
+                }
+                hopperAddItem(location, chunk, name);
+            }, plugin.getDelay());
         }
 
     }
