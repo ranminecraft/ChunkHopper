@@ -104,7 +104,9 @@ public class HopperUtil {
                 Integer.parseInt(xyz[2]));
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
-            List<String> itemList = plugin.getChunkYml().getStringList(Objects.requireNonNull(hopper.getCustomName()));
+            String customName = hopper.getCustomName();
+            if (customName == null) return;
+            List<String> itemList = plugin.getChunkYml().getStringList(customName);
             for (Entity entity : entities) {
                 if (entity.getType() == EntityType.DROPPED_ITEM) {
                     Item item = (Item) entity;
