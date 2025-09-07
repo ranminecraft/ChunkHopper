@@ -38,7 +38,7 @@ public class HopperUtil {
         int redStone = 0;
         Entity[] entities = block.getChunk().getEntities();
         for (Entity entity : entities) {
-            if (entity.getType() == EntityType.MINECART_HOPPER) {
+            if (entity.getType() == EntityType.HOPPER_MINECART) {
                 hopper++;
             }
         }
@@ -46,10 +46,11 @@ public class HopperUtil {
         for (int x = 0; x < 16; x++) {
             for (int y = block.getWorld().getMinHeight(); y < block.getWorld().getMaxHeight(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (block.getChunk().getBlock(x, y, z).getType() == Material.HOPPER) {
+                    Material material = block.getChunk().getBlock(x, y, z).getType();
+                    if (material == Material.HOPPER) {
                         hopper++;
                     }
-                    if (block.getChunk().getBlock(x, y, z).getType() == Material.REDSTONE_WIRE) {
+                    if (material == Material.REDSTONE_WIRE || material == Material.REDSTONE_TORCH) {
                         redStone++;
                     }
                 }
@@ -108,7 +109,7 @@ public class HopperUtil {
             if (customName == null) return;
             List<String> itemList = plugin.getChunkYml().getStringList(customName);
             for (Entity entity : entities) {
-                if (entity.getType() == EntityType.DROPPED_ITEM) {
+                if (entity.getType() == EntityType.ITEM) {
                     Item item = (Item) entity;
                     if (itemList.contains(item.getItemStack().getType().toString())) {
                         Inventory inventory = hopper.getInventory();

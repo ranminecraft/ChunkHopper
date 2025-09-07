@@ -1,7 +1,6 @@
 package cc.ranmc.hopper.listener;
 
 import cc.ranmc.hopper.Main;
-import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,6 +25,7 @@ import static cc.ranmc.hopper.utils.BaseUtil.color;
 import static cc.ranmc.hopper.utils.HopperUtil.countBlock;
 import static cc.ranmc.hopper.utils.HopperUtil.getKey;
 import static cc.ranmc.hopper.utils.HopperUtil.hopper;
+import static io.papermc.lib.PaperLib.getChunkAtAsync;
 
 public class MainListener implements Listener {
 
@@ -104,7 +104,7 @@ public class MainListener implements Listener {
                 if (plugin.isFolia()) {
                     Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
                 } else {
-                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
+                    getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 }
                 return;
             }
@@ -125,7 +125,7 @@ public class MainListener implements Listener {
                 if (plugin.isFolia()) {
                     Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
                 } else {
-                    PaperLib.getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
+                    getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 }
                 return;
             }
