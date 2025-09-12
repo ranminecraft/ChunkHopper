@@ -50,7 +50,9 @@ public class HopperUtil {
                     if (material == Material.HOPPER) {
                         hopper++;
                     }
-                    if (material == Material.REDSTONE_WIRE || material == Material.REDSTONE_TORCH) {
+                    if (material == Material.REDSTONE_WIRE ||
+                            material == Material.REDSTONE_TORCH ||
+                            material == Material.REPEATER) {
                         redStone++;
                     }
                 }
