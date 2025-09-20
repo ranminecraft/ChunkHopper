@@ -91,11 +91,13 @@ public class MainListener implements Listener {
                 block.getType() == Material.REDSTONE_WIRE) {
             if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
                 int count = plugin.getRedStoneCountMap().get(chunkKey);
-                if (count >= plugin.getConfig().getInt("redstone-limit",128)) {
+                int max = plugin.getConfig().getInt("redstone-limit",128);
+                if (count > max) {
                     event.setCancelled(true);
-                    player.sendMessage(color("&c该区块存在红石已达上限\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
+                    player.sendMessage(color("&c该区块放置红石已达上限\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
                     return;
                 } else {
+                    player.sendActionBar(color("&e该区块已经放置红石 " + count + " / " + max));
                     plugin.getRedStoneCountMap().put(chunkKey, plugin.getRedStoneCountMap().get(chunkKey) + 1);
                 }
             } else {
@@ -112,11 +114,13 @@ public class MainListener implements Listener {
         if (block.getType() == Material.HOPPER) {
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                 int count = plugin.getHopperCountMap().get(chunkKey);
-                if (count >= plugin.getConfig().getInt("limit",32)) {
+                int max = plugin.getConfig().getInt("limit",32);
+                if (count > max) {
                     event.setCancelled(true);
-                    player.sendMessage(color("&c该区块存在漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
+                    player.sendMessage(color("&c该区块放置漏斗已达上限\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                     return;
                 } else {
+                    player.sendActionBar(color("&e该区块已经放置漏斗 " + count + " / " + max));
                     plugin.getHopperCountMap().put(chunkKey, plugin.getHopperCountMap().get(chunkKey) + 1);
                 }
             } else {
@@ -163,7 +167,8 @@ public class MainListener implements Listener {
             hopper(block.getLocation());
         }
         Player player = event.getPlayer();
-        if (block.getType() == Material.HOPPER) {
+        Material material = block.getType();
+        if (material == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
             String chunkKey = getKey(block.getChunk());
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
@@ -179,6 +184,14 @@ public class MainListener implements Listener {
                 } catch (IOException ignore) {}
             }
 
+        } else if (material == Material.REDSTONE_WIRE ||
+                material == Material.REDSTONE_TORCH ||
+                material == Material.REPEATER) {
+            String chunkKey = getKey(block.getChunk());
+            if (plugin.getRedStoneCountMap().containsKey(chunkKey)) {
+                plugin.getRedStoneCountMap().put(chunkKey,
+                        plugin.getRedStoneCountMap().get(chunkKey) - 1);
+            }
         }
     }
 }
