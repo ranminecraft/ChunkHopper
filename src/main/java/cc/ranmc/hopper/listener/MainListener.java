@@ -112,6 +112,28 @@ public class MainListener implements Listener {
             }
         }
         if (block.getType() == Material.HOPPER) {
+            Hopper hopper = (Hopper) block.getState();
+            String key = getKey(hopper);
+            if (hopper.getCustomName() != null && plugin.getChunkYml().contains(hopper.getCustomName())) {
+                if (plugin.getDataYml().getString(key) != null) {
+                    String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(key)).split("x");
+                    player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
+                    event.setCancelled(true);
+                    return;
+                }
+                player.sendMessage(PREFIX + color("&a你放置了一个区块漏斗"));
+                StringBuilder xyz = new StringBuilder();
+                Location location = hopper.getLocation();
+                xyz.append(location.getBlockX());
+                xyz.append("x");
+                xyz.append(location.getBlockY());
+                xyz.append("x");
+                xyz.append(location.getBlockZ());
+                plugin.getDataYml().set(key, xyz.toString());
+                try {
+                    plugin.getDataYml().save(plugin.getDataFile());
+                } catch (IOException ignored) {}
+            }
             if (plugin.getHopperCountMap().containsKey(chunkKey)) {
                 int count = plugin.getHopperCountMap().get(chunkKey);
                 int max = plugin.getConfig().getInt("limit",32);
@@ -132,29 +154,6 @@ public class MainListener implements Listener {
                     getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 }
                 return;
-            }
-            Hopper hopper = (Hopper) block.getState();
-            String key = getKey(hopper);
-            if (hopper.getCustomName() == null) return;
-            if (plugin.getChunkYml().contains(hopper.getCustomName())) {
-                if (plugin.getDataYml().getString(key) != null) {
-                    String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(key)).split("x");
-                    player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
-                    event.setCancelled(true);
-                    return;
-                }
-                player.sendMessage(PREFIX + color("&a你放置了一个区块漏斗"));
-                StringBuilder xyz = new StringBuilder();
-                Location location = hopper.getLocation();
-                xyz.append(location.getBlockX());
-                xyz.append("x");
-                xyz.append(location.getBlockY());
-                xyz.append("x");
-                xyz.append(location.getBlockZ());
-                plugin.getDataYml().set(key, xyz.toString());
-                try {
-                    plugin.getDataYml().save(plugin.getDataFile());
-                } catch (IOException ignored) {}
             }
         }
     }
