@@ -83,7 +83,7 @@ public class MainListener implements Listener {
 
     @EventHandler
     private void onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (!plugin.isEnable() && event.isCancelled()) return;
+        if (!plugin.isEnable() || event.isCancelled()) return;
         Block block = event.getBlock();
         Player player = event.getPlayer();
         String chunkKey = getKey(block.getChunk());
