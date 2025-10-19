@@ -67,7 +67,6 @@ public class HopperUtil {
      */
     public static void hopper(Location location) {
 
-
         if (plugin.isFolia()) {
             Bukkit.getServer().getRegionScheduler().runDelayed(plugin, location,scheduledTask -> {
                 Chunk chunk = location.getChunk();

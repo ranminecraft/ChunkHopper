@@ -1,5 +1,9 @@
 # 启用插件
 enable: true
+
+# 插件前缀
+prefix: "&b[区块漏斗]"
+
 # 活塞推出物品后收集
 piston: true
 # 生物死亡掉落物品后收集
@@ -10,13 +14,12 @@ block: true
 grow: true
 # 爆炸破坏方块后收集
 explode: true
+
 # 关闭区块漏斗世界
 disable-world:
   - world_nether
   - world_the_end
 
-# 插件前缀
-prefix: "&b[区块漏斗]"
 # 一个区块最大漏斗上限
 limit: 32
 # 在一个方块被破坏多久之后检测
