@@ -10,6 +10,10 @@ block: true
 grow: true
 # 爆炸破坏方块后收集
 explode: true
+# 关闭区块漏斗世界
+disable-world:
+  - world_nether
+  - world_the_end
 
 # 插件前缀
 prefix: "&b[区块漏斗]"

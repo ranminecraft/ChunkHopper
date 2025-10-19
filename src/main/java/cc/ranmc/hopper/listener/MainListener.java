@@ -114,7 +114,13 @@ public class MainListener implements Listener {
         if (block.getType() == Material.HOPPER) {
             Hopper hopper = (Hopper) block.getState();
             String key = getKey(hopper);
-            if (hopper.getCustomName() != null && plugin.getChunkYml().contains(hopper.getCustomName())) {
+            if (hopper.getCustomName() != null &&
+                    plugin.getChunkYml().contains(hopper.getCustomName())) {
+                if (plugin.getConfig().getStringList("disable-world").contains(block.getWorld().getName())) {
+                    player.sendMessage(PREFIX + color("&c该世界不允许放置区块漏斗"));
+                    event.setCancelled(true);
+                    return;
+                }
                 if (plugin.getDataYml().getString(key) != null) {
                     String[] xyz = Objects.requireNonNull(plugin.getDataYml().getString(key)).split("x");
                     player.sendMessage(PREFIX + color("&c该区块已存在区块漏斗 x" + xyz[0] + " y" + xyz[1] + " z" + xyz[2]));
