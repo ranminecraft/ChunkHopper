@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cc.ranmc.hopper.Main.PREFIX;
+import static cc.ranmc.hopper.utils.BaseUtil.print;
+
 public class HopperUtil {
 
     private static final Main plugin = Main.getInstance();
@@ -59,6 +62,21 @@ public class HopperUtil {
         }
         Main.getInstance().getHopperCountMap().put(getKey(block.getChunk()), hopper);
         Main.getInstance().getRedStoneCountMap().put(getKey(block.getChunk()), redStone);
+
+        int hopperLimit = plugin.getConfig().getInt("limit",32);
+        if (hopper > hopperLimit) print(PREFIX + "&c" + getLocationStr(block.getLocation()) +
+                "该区块漏斗已经超出数量 " + hopper + " / " + hopperLimit);
+
+        int redstoneLimit = plugin.getConfig().getInt("redstone-limit",128);
+        if (redStone > redstoneLimit) print(PREFIX + "&c" + getLocationStr(block.getLocation()) +
+                "该区块红石已经超出数量 " + redStone + " / " + redstoneLimit);
+    }
+
+    public static String getLocationStr(Location location) {
+        return location.getWorld().getName() + "," +
+                location.getX() + "," +
+                location.getY() + "," +
+                location.getZ();
     }
 
     /**
