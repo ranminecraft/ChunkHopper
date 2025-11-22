@@ -3,7 +3,7 @@ package cc.ranmc.hopper.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
-public class BaseUtil {
+public class BasicUtil {
 
     /**
      * 判断背包是否已满

@@ -1,7 +1,6 @@
 package cc.ranmc.hopper.listener;
 
 import cc.ranmc.hopper.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,11 +20,10 @@ import java.io.IOException;
 import java.util.Objects;
 
 import static cc.ranmc.hopper.Main.PREFIX;
-import static cc.ranmc.hopper.utils.BaseUtil.color;
+import static cc.ranmc.hopper.utils.BasicUtil.color;
 import static cc.ranmc.hopper.utils.HopperUtil.countBlock;
 import static cc.ranmc.hopper.utils.HopperUtil.getKey;
 import static cc.ranmc.hopper.utils.HopperUtil.hopper;
-import static io.papermc.lib.PaperLib.getChunkAtAsync;
 
 public class MainListener implements Listener {
 
@@ -103,11 +101,7 @@ public class MainListener implements Listener {
             } else {
                 player.sendMessage(color("&e该区块计算红石中请稍后\n为了大家游戏流畅度考虑\n请留更多性能给更多玩家"));
                 event.setCancelled(true);
-                if (plugin.isFolia()) {
-                    Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
-                } else {
-                    getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
-                }
+                block.getWorld().getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 return;
             }
         }
@@ -154,11 +148,7 @@ public class MainListener implements Listener {
             } else {
                 player.sendMessage(color("&e该区块计算漏斗中请稍后\n推荐您使用区块漏斗功能\n详情查看菜单中游戏帮助"));
                 event.setCancelled(true);
-                if (plugin.isFolia()) {
-                    Bukkit.getRegionScheduler().run(plugin, block.getLocation(), scheduledTask -> countBlock(block));
-                } else {
-                    getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
-                }
+                block.getWorld().getChunkAtAsync(block.getLocation()).thenAccept(chunk -> countBlock(block));
                 return;
             }
         }

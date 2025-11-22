@@ -3,7 +3,7 @@ package cc.ranmc.hopper.utils;
 import cc.ranmc.hopper.Main;
 import org.bukkit.Bukkit;
 
-import static cc.ranmc.hopper.utils.BaseUtil.isInventoryFull;
+import static cc.ranmc.hopper.utils.BasicUtil.isInventoryFull;
 
 public class TickUtil {
 

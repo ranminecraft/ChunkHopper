@@ -2,7 +2,7 @@ package cc.ranmc.hopper;
 
 import cc.ranmc.hopper.command.MainCommand;
 import cc.ranmc.hopper.listener.MainListener;
-import cc.ranmc.hopper.utils.BaseUtil;
+import cc.ranmc.hopper.utils.BasicUtil;
 import cc.ranmc.hopper.utils.ConfigUtil;
 import cc.ranmc.hopper.utils.TickUtil;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cc.ranmc.hopper.utils.BaseUtil.print;
+import static cc.ranmc.hopper.utils.BasicUtil.print;
 import static cc.ranmc.hopper.utils.TickUtil.tickFolia;
 
 public class Main extends JavaPlugin implements Listener {
@@ -54,8 +54,6 @@ public class Main extends JavaPlugin implements Listener {
     @Getter
     @Setter
     private int delay;
-    @Getter
-    private final boolean folia = BaseUtil.isFolia();
     private BukkitTask task = null;
     private ScheduledTask foliaTask = null;
     @Getter
@@ -73,7 +71,7 @@ public class Main extends JavaPlugin implements Listener {
 
         ConfigUtil.reload();
 
-        if (folia) {
+        if (BasicUtil.isFolia()) {
             foliaTask = Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(this, task -> tickFolia(), 20, 20);
         } else {
             task = Bukkit.getScheduler().runTaskTimer(this, TickUtil::tick, 20, 20);

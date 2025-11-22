@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static cc.ranmc.hopper.Main.PREFIX;
-import static cc.ranmc.hopper.utils.BaseUtil.color;
-import static cc.ranmc.hopper.utils.BaseUtil.print;
+import static cc.ranmc.hopper.utils.BasicUtil.color;
+import static cc.ranmc.hopper.utils.BasicUtil.print;
 
 public class MainCommand implements CommandExecutor {
 

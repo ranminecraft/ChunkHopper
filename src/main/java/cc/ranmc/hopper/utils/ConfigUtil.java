@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static cc.ranmc.hopper.utils.BaseUtil.color;
+import static cc.ranmc.hopper.utils.BasicUtil.color;
 
 public class ConfigUtil {
 
