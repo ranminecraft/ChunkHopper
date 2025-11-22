@@ -8,6 +8,7 @@ import cc.ranmc.hopper.utils.TickUtil;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
@@ -85,6 +86,9 @@ public class Main extends JavaPlugin implements Listener {
         MainCommand command = new MainCommand();
         Objects.requireNonNull(Bukkit.getPluginCommand("ch")).setExecutor(command);
         Objects.requireNonNull(Bukkit.getPluginCommand("chunkhopper")).setExecutor(command);
+
+        // BStats
+        new Metrics(this, 28105);
 
         super.onEnable();
     }

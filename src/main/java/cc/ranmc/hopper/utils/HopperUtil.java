@@ -49,8 +49,7 @@ public class HopperUtil {
                     Material material = block.getChunk().getBlock(x, y, z).getType();
                     if (material == Material.HOPPER) {
                         hopper++;
-                    }
-                    if (material == Material.REDSTONE_WIRE ||
+                    } else if (material == Material.REDSTONE_WIRE ||
                             material == Material.REDSTONE_TORCH ||
                             material == Material.REPEATER) {
                         redStone++;
